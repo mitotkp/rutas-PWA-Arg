@@ -1,5 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
+// 1. Importamos los iconos de Lucide
+import { X, Pencil, Save, Info } from 'lucide-vue-next';
 
 const props = defineProps({
   isVisible: Boolean,
@@ -30,8 +32,11 @@ function handleUpdate() {
     <div v-if="isVisible" class="modal-overlay" @click.self="emit('close')">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Editar Cantidad</h3>
-          <button class="close-button" @click="emit('close')">&times;</button>
+          <h3><Pencil :size="18" /> Editar Cantidad</h3>
+          
+          <button class="close-button" @click="emit('close')">
+            <X :size="24" />
+          </button>
         </div>
         <div class="modal-body" v-if="item">
           <p class="item-name">{{ item.producto.descripcion }}</p>
@@ -44,11 +49,16 @@ function handleUpdate() {
               min="0" 
               class="quantity-input"
             >
-            <p class="info-text">Si la cantidad es 0, el artículo se eliminará del pedido.</p>
+            <p class="info-text">
+              <Info :size="14" /> 
+              Si la cantidad es 0, el artículo se eliminará del pedido.
+            </p>
           </div>
         </div>
         <div class="modal-footer">
-          <button @click="handleUpdate" class="update-button">Actualizar</button>
+          <button @click="handleUpdate" class="update-button">
+            <Save :size="18" /> Actualizar
+          </button>
         </div>
       </div>
     </div>
@@ -69,10 +79,26 @@ function handleUpdate() {
   display: flex; justify-content: space-between; align-items: center;
   padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 20px;
 }
-.modal-header h3 { font-size: 18px; margin: 0; color: #333; }
+.modal-header h3 { 
+  font-size: 18px; 
+  margin: 0; 
+  color: #333;
+  /* Alineación del icono del título */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .close-button {
-  background: none; border: none; font-size: 28px;
+  background: none; border: none; 
   cursor: pointer; color: #888;
+  /* Alineación del botón cerrar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.close-button:hover {
+  color: #333;
 }
 .item-name {
     font-weight: 600;
@@ -97,8 +123,12 @@ function handleUpdate() {
 .info-text {
     font-size: 12px;
     color: #718096;
-    text-align: center;
     margin-top: 10px;
+    /* Alineación del icono de información */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 .modal-footer {
     margin-top: 20px;
@@ -113,6 +143,15 @@ function handleUpdate() {
     font-weight: bold;
     font-size: 16px;
     cursor: pointer;
+    /* Alineación del icono del botón */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+}
+.update-button:hover {
+  background-color: #218838;
 }
 .modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.3s ease; }
 .modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }

@@ -1,6 +1,8 @@
 <script setup>
 import { ref, watch, computed, onMounted } from 'vue';
 import { db } from '@/database.js';
+// 1. Importar los iconos de Lucide (Renombramos Image a ImageIcon por seguridad en Vue)
+import { Image as ImageIcon, X, ShoppingCart } from 'lucide-vue-next';
 
 const props = defineProps({
   isVisible: Boolean,
@@ -73,7 +75,7 @@ function handleAddToOrder() {
                 class="real-product-img"
                 loading="lazy"
             />
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <ImageIcon v-else :size="64" />
           </div>
           <div class="product-details">
             <h2 class="product-title">{{ producto.descripcion }}</h2>
@@ -106,10 +108,15 @@ function handleAddToOrder() {
                 <label for="unidades">UNDS A SOLICITAR</label>
                 <input id="unidades" type="number" v-model.number="unidades" min="1">
             </div>
-            <button @click="handleAddToOrder" class="add-button">AGREGAR</button>
+            <button @click="handleAddToOrder" class="add-button">
+              <ShoppingCart :size="20" />
+              AGREGAR
+            </button>
         </div>
 
-        <button class="close-button" @click="emit('close')">&times;</button>
+        <button class="close-button" @click="emit('close')">
+          <X :size="24" />
+        </button>
       </div>
     </div>
   </Transition>
@@ -128,7 +135,13 @@ function handleAddToOrder() {
 }
 .close-button {
   position: absolute; top: 10px; right: 10px; background: none; border: none;
-  font-size: 28px; cursor: pointer; color: #888;
+  cursor: pointer; color: #888;
+  /* Centramos el icono X */
+  display: flex; align-items: center; justify-content: center; padding: 5px;
+  transition: color 0.2s;
+}
+.close-button:hover {
+  color: #333;
 }
 .product-layout {
   display: flex;
@@ -183,6 +196,12 @@ function handleAddToOrder() {
   background-color: #28a745; color: white; border: none;
   padding: 12px 20px; border-radius: 8px; font-weight: bold;
   cursor: pointer; font-size: 16px; flex-grow: 1;
+  /* Centramos el texto y el icono del carrito */
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background-color 0.2s;
+}
+.add-button:hover {
+  background-color: #218838;
 }
 .modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.3s ease; }
 .modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }

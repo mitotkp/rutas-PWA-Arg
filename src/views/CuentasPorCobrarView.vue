@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getCxCByCliente, getCliente } from '@/database.js';
+// 1. Importamos los iconos de Lucide
+import { ArrowLeft, FileText } from 'lucide-vue-next';
 
 const route = useRoute();
 const router = useRouter();
@@ -47,7 +49,7 @@ function goBack() {
   <div class="cuentas-container" v-if="cliente">
     <div class="view-header">
       <button @click="goBack" class="back-button">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <ArrowLeft :size="24" />
       </button>
       <div>
         <h1>Cuentas por Cobrar</h1>
@@ -64,7 +66,7 @@ function goBack() {
     <div class="cuentas-list">
       <div v-for="cuenta in cuentas" :key="cuenta.documento" class="cuenta-card">
         <div class="icon-container">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <FileText :size="24" />
         </div>
         <div class="cuenta-info">
           <div class="info-header">
@@ -100,7 +102,15 @@ function goBack() {
   margin-bottom: 20px;
 }
 .back-button {
-  background: none; border: none; cursor: pointer; margin-right: 15px; color: #333;
+  background: none; 
+  border: none; 
+  cursor: pointer; 
+  margin-right: 15px; 
+  color: #333;
+  /* Alineación del icono */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .view-header h1 {
   font-size: 22px; font-weight: 600; margin: 0;
@@ -136,6 +146,10 @@ function goBack() {
 .icon-container {
     flex-shrink: 0;
     color: #718096;
+    /* Alineación perfecta para FileText */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .cuenta-info {
   flex-grow: 1;

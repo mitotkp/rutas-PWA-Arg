@@ -14,7 +14,7 @@ import ReloadPrompt from './components/ReloadPrompt.vue';
 onMounted(() => {
   loadDataIntoMemory();
   startHeartbeat();
-  restoreSession()
+  restoreSession();
 
   window.addEventListener('beforeinstallprompt', (e) => {
     // Prevenimos que el navegador muestre su propio mini-banner
@@ -27,13 +27,11 @@ onMounted(() => {
 </script>
 
 <template>
-  
   <div id="app-layout">
-
     <SideNav v-if="isAuthenticated" />
+    
     <div v-if="store.isSidenavOpen" @click="toggleSidenav" class="overlay"></div>
     
-  
     <div class="main-content-wrapper">
         <DynamicHeader />
         <main>
@@ -41,7 +39,6 @@ onMounted(() => {
         </main>
     </div>
     
-   
     <AlertComponent />
     <IpConfigModal />
     <ConnectionStatus />

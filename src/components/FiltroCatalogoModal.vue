@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { db } from '@/database.js';
+// 1. Importamos los iconos de Lucide
+import { X, Filter, FilterX, Check } from 'lucide-vue-next';
 
 // Definimos las propiedades que el componente recibe
 const props = defineProps({
@@ -40,8 +42,10 @@ function clearFilters() {
     <div v-if="isVisible" class="modal-overlay" @click.self="emit('close')">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>Filtros Avanzados</h2>
-          <button class="close-button" @click="emit('close')">&times;</button>
+          <h2><Filter :size="20" /> Filtros Avanzados</h2>
+          <button class="close-button" @click="emit('close')">
+            <X :size="24" />
+          </button>
         </div>
         
         <div class="modal-body">
@@ -64,8 +68,12 @@ function clearFilters() {
         </div>
 
         <div class="modal-footer">
-            <button @click="clearFilters" class="clear-button">Limpiar</button>
-            <button @click="applyAndClose" class="apply-button">Aplicar Filtros</button>
+            <button @click="clearFilters" class="clear-button">
+              <FilterX :size="18" /> Limpiar
+            </button>
+            <button @click="applyAndClose" class="apply-button">
+              <Check :size="18" /> Aplicar Filtros
+            </button>
         </div>
       </div>
     </div>
@@ -86,10 +94,26 @@ function clearFilters() {
   display: flex; justify-content: space-between; align-items: center;
   padding-bottom: 15px; border-bottom: 1px solid #eee; margin-bottom: 20px;
 }
-.modal-header h2 { font-size: 18px; margin: 0; color: #333; }
+.modal-header h2 { 
+  font-size: 18px; 
+  margin: 0; 
+  color: #333;
+  /* Centramos el icono del título con el texto */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .close-button {
-  background: none; border: none; font-size: 28px;
+  background: none; border: none; 
   cursor: pointer; color: #888;
+  /* Alineación de la X */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.close-button:hover {
+  color: #333;
 }
 .filter-group {
   margin-bottom: 15px;
@@ -107,12 +131,24 @@ function clearFilters() {
 .clear-button, .apply-button {
   flex: 1; padding: 12px; border-radius: 8px; font-weight: bold;
   font-size: 16px; cursor: pointer; border: none;
+  /* Alineamos los iconos con el texto de los botones */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s;
 }
 .clear-button {
   background-color: #e9ecef; color: #495057;
 }
+.clear-button:hover {
+  background-color: #dee2e6;
+}
 .apply-button {
   background-color: #28a745; color: white;
+}
+.apply-button:hover {
+  background-color: #218838;
 }
 .modal-fade-enter-active, .modal-fade-leave-active {
   transition: opacity 0.3s ease;

@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { store, totalMontoPedido, subirPedidoActual, eliminarItemDelPedido, actualizarCantidadItem, cancelarPedidoActual } from '@/store.js';
 import EditOrderItemModal from '@/components/EditOrderItemModal.vue';
+// 1. Importamos los iconos de Lucide
+import { ShoppingCart, Pencil, Trash2, CloudUpload, Loader2, CheckCircle } from 'lucide-vue-next';
 
 const router = useRouter();
 
@@ -13,17 +15,12 @@ const isCancelConfirmVisible = ref(false);
 let cancelTimeout = null;
 
 async function handleSubirPedido() {
-
     const exito = await subirPedidoActual();
-
     if (exito) {
-        
         setTimeout(() => {
-            
             router.push({ name: 'catalogo' });
         }, 1500);
     }
-   
 }
 
 async function handleCancelClick() {
@@ -68,15 +65,13 @@ function formatDate(dateString) {
 
 <template>
     <div class="pedido-container">
-        <!-- Estado Vacío -->
         <div v-if="!store.pedido.cliente || store.pedido.items.length === 0" class="empty-state">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <ShoppingCart :size="64" />
             <h2>Tu pedido está vacío</h2>
             <p>Añade productos desde el catálogo para empezar.</p>
             <button @click="goToCatalog" class="primary-action primary-action-left">Ir al Catálogo</button>
         </div>
         
-        <!-- Contenido del Pedido -->
         <template v-else>
            <div class="items-section-wrapper">
                 <div class="header-card">
@@ -101,8 +96,12 @@ function formatDate(dateString) {
                         <div class="item-summary">
                             <strong>{{ (item.cantidad * item.precio).toLocaleString('es-VE', { style: 'currency', currency: 'USD' }) }}</strong>
                             <div v-if="store.pedido.status === 'Pendiente'" class="item-actions">
-                                <button @click="openEditModal(item)" class="icon-btn edit-btn" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                                <button @click="eliminarItemDelPedido(item.producto.codArticulo)" class="icon-btn delete-btn" title="Eliminar"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
+                                <button @click="openEditModal(item)" class="icon-btn edit-btn" title="Editar">
+                                    <Pencil :size="18" />
+                                </button>
+                                <button @click="eliminarItemDelPedido(item.producto.codArticulo)" class="icon-btn delete-btn" title="Eliminar">
+                                    <Trash2 :size="18" />
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -110,7 +109,6 @@ function formatDate(dateString) {
            </div>
         </template>
 
-        <!-- Footer de Acciones Fijo (Rediseñado) -->
         <div v-if="store.pedido.cliente" class="summary-footer" :class="{ 'with-offline-banner': store.isOfflineBannerVisible }">
             <div class="total-section">
                 <span class="total-label">Total del Pedido</span>
@@ -123,18 +121,18 @@ function formatDate(dateString) {
                 </button>
                 
                 <button v-if="store.pedido.status === 'Pendiente'" @click="handleCancelClick" class="cancel-action" :class="{ 'confirm': isCancelConfirmVisible }">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <Trash2 :size="20" />
                     <span>{{ isCancelConfirmVisible ? '¿Confirmar?' : 'Cancelar' }}</span>
                 </button>
                 
                 <button v-if="store.pedido.status === 'Pendiente'" @click="handleSubirPedido" :disabled="store.isSubiendoPedido" class="primary-action">
-                    <svg v-if="!store.isSubiendoPedido" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    <svg v-else class="spinner" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle></svg>
+                    <CloudUpload v-if="!store.isSubiendoPedido" :size="20" />
+                    <Loader2 v-else :size="20" class="spinner-lucide" />
                     <span>{{ store.isSubiendoPedido ? 'Subiendo...' : 'Subir Pedido' }}</span>
                 </button>
                 
                 <div v-if="store.pedido.status === 'Subido'" class="uploaded-indicator">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <CheckCircle :size="20" />
                     <span>Pedido Subido</span>
                 </div>
             </div>
@@ -208,6 +206,7 @@ function formatDate(dateString) {
     background: #f0f2f5; border: none; border-radius: 50%;
     width: 32px; height: 32px; display: flex; align-items: center;
     justify-content: center; cursor: pointer; color: #718096;
+    transition: background-color 0.2s, color 0.2s;
 }
 .delete-btn:hover { background-color: #fed7d7; color: #c53030; }
 .edit-btn:hover { background-color: #dbeafe; color: #2563eb; }
@@ -239,10 +238,14 @@ function formatDate(dateString) {
     border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1;
     font-size: 14px;
+    transition: background-color 0.2s;
 }
 .primary-action { background-color: #28a745; color: white; }
+.primary-action:hover:not(:disabled) { background-color: #218838; }
 .secondary-action { background-color: #e9ecef; color: #495057; }
+.secondary-action:hover { background-color: #dee2e6; }
 .cancel-action { background-color: #fff; color: #e74c3c; border: 1px solid #e74c3c; }
+.cancel-action:hover { background-color: #fdf2f2; }
 .cancel-action.confirm { background-color: #e74c3c; color: white; }
 .uploaded-indicator { background-color: #2ecc71; color: white; cursor: default; }
 
@@ -251,17 +254,18 @@ function formatDate(dateString) {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     height: 60vh; color: #718096; text-align: center; padding: 20px;
 }
-.empty-state svg { margin-bottom: 20px; color: #cbd5e0; }
+.empty-state > svg { margin-bottom: 20px; color: #cbd5e0; }
 .primary-action-left { margin-top: 20px; flex: 0; width: 200px; }
 
-/* Spinner */
-.spinner { animation: rotate 2s linear infinite; width: 20px; height: 20px; }
-.spinner .path { stroke: white; stroke-linecap: round; animation: dash 1.5s ease-in-out infinite; }
-@keyframes rotate { 100% { transform: rotate(360deg); } }
-@keyframes dash { 0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; } 50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; } 100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; } }
+/* Spinner animado para Lucide */
+.spinner-lucide {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin { 
+    100% { transform: rotate(360deg); } 
+}
 
 /* --- RESPONSIVE TABLET Y DESKTOP --- */
-/* Cambiamos el breakpoint a 900px. Antes de esto, se verá como móvil (columna única) */
 @media (min-width: 900px) {
     .pedido-container {
         flex-direction: row; /* Layout horizontal */

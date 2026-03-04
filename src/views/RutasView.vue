@@ -15,6 +15,9 @@ import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 
+// 1. Importamos los iconos de Lucide
+import { MapPin, Navigation, Users, Loader2 } from 'lucide-vue-next';
+
 const nearbyClient = ref(null); 
 
 const DefaultIcon = L.icon({
@@ -146,7 +149,6 @@ function toggleRuta() {
     } else {
         if (!userLocation.value || clientsWithCoords.value.length === 0) {
             setAlert('error', 'Se necesita la ubicación del usuario y al menos un cliente para calcular la ruta.'); 
-            //alert("Se necesita la ubicación del usuario y al menos un cliente para calcular la ruta.");
             return;
         }
         isCalculatingRoute.value = true;
@@ -157,7 +159,6 @@ function toggleRuta() {
 
         if (validClientCoords.length === 0) {
             setAlert('error', 'Ninguno de los clientes aptos tiene un formato de coordenadas válido para trazar la ruta.'); 
-            //alert("Ninguno de los clientes aptos tiene un formato de coordenadas válido para trazar la ruta.");
             isCalculatingRoute.value = false;
             return;
         }
@@ -235,14 +236,10 @@ onMounted(() => {
                 routeWhileDragging: false,
                 lineOptions: { styles: [{ color: '#28a745', opacity: 1, weight: 5 }] },
                 createMarker: function(i, waypoint, n) {
-                    
                     if (i === 0) {
                         return null; 
                     }
-
                     const marker = L.marker(waypoint.latLng);
-                    console.log(n); 
-
                     const client = i > 0 ? clientsWithCoords.value[i-1] : null;
                     const label = `Parada ${i}: ${client?.nombreComercial}`;
                     marker.bindPopup(label);
@@ -257,15 +254,12 @@ onMounted(() => {
         }
 
         if (store.clientes && store.clientes.length > 0) {
-            //console.log("Datos del store encontrados. Creando copia reactiva local.");
             localClientes.value = store.clientes;
         }
     });
 });
 
 watch(localClientes, (newClientList) => {
-    //console.log("El watch de localClientes se ha disparado.");
-    console.log(newClientList); 
     isLoadingClients.value = false;
 
     if (!clientMarkersCluster.value) return;
@@ -273,17 +267,12 @@ watch(localClientes, (newClientList) => {
     clientMarkersCluster.value.clearLayers();
     
     const clientsToDraw = clientsWithCoords.value;
-    //console.log(`Clientes aptos para dibujar (según computed): ${clientsToDraw.length}`);
 
     if (clientsToDraw.length > 0) {
-        //console.log('--- ANÁLISIS DE PARSEO DE COORDENADAS ---');
-        
         const markers = clientsToDraw.map(cliente => {
             const coordString = cliente.coordenadas;
             const parsedResult = parseCoordinates(coordString);
             
-            console.log(`Cliente: ${cliente.nombreComercial} | Coordenadas de entrada: "${coordString}" | Resultado del parseo:`, parsedResult);
-
             if (parsedResult) {
                 return L.marker(parsedResult).bindPopup(`<b>${cliente.nombreComercial}</b><br>${cliente.direccion}`);
             }
@@ -296,8 +285,6 @@ watch(localClientes, (newClientList) => {
                 mapInstance.value.fitBounds(clientMarkersCluster.value.getBounds().pad(0.5));
             }
         }
-    } else {
-        console.log("No se crearon marcadores porque no hay clientes que pasen el filtro inicial.");
     }
 }, { 
     deep: true,
@@ -317,7 +304,6 @@ function dismissNotification() {
 onUnmounted(() => {
     if (watchId) {
         navigator.geolocation.clearWatch(watchId);
-        console.log('[DEBUG] Seguimiento de ubicación detenido.');
     }
     if (proximidadCheck) {
         clearInterval(proximidadCheck);
@@ -337,22 +323,29 @@ onUnmounted(() => {
                 <h1>Mis Rutas</h1>
             </div>
             <div class="rutas-user-ubicacion">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <MapPin :size="20" />
                 <span :class="{ 'loading': isLoadingLocation }">{{ userAddress }}</span>
             </div>
             <div class="rutas-user-accion">
                  <button class="action-btn primary" @click="toggleRuta" :disabled="isCalculatingRoute">
-                    <span v-if="!isCalculatingRoute">Iniciar Ruta</span>
-                    <span v-else>Calculando...</span>
+                    <Navigation v-if="!isCalculatingRoute" :size="18" />
+                    <Loader2 v-else :size="18" class="spinner-lucide" />
+                    <span>{{ !isCalculatingRoute ? 'Iniciar Ruta' : 'Calculando...' }}</span>
                 </button>
-                <button class="action-btn secondary" @click="router.push({ name: 'clientes' })">Libreta de Clientes</button>
+                <button class="action-btn secondary" @click="router.push({ name: 'clientes' })">
+                    <Users :size="18" />
+                    <span>Libreta de Clientes</span>
+                </button>
             </div>
         </div>
 
         <div class="map-wrapper">
             <Transition name="slide-down">
                 <div v-if="nearbyClient" class="proximity-notification">
-                    <span>Estás cerca de <strong>{{ nearbyClient.nombreComercial }}</strong>. ¿Registrar visita?</span>
+                    <div class="notification-content">
+                        <MapPin :size="20" />
+                        <span>Estás cerca de <strong>{{ nearbyClient.nombreComercial }}</strong>. ¿Registrar visita?</span>
+                    </div>
                     <div class="notification-actions">
                         <button @click="confirmVisit" class="btn-confirm">Sí, Visité</button>
                         <button @click="dismissNotification" class="btn-dismiss">Omitir</button>
@@ -361,8 +354,9 @@ onUnmounted(() => {
             </Transition>
 
             <div class="rutas-map" ref="mapContainer"></div>
+            
             <div v-if="isLoadingClients" class="loading-overlay">
-                <div class="spinner"></div>
+                <Loader2 :size="40" class="spinner-lucide-large" color="#3498db" />
                 <p>Cargando clientes en el mapa...</p>
             </div>
         </div>
@@ -422,6 +416,11 @@ onUnmounted(() => {
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s;
+    /* Centramos el texto y los nuevos iconos en los botones */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 .action-btn:disabled {
     background-color: #a0a0a0;
@@ -467,17 +466,15 @@ onUnmounted(() => {
     color: #34495e;
 }
 
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
+/* Clases para los spinners de Lucide */
+.spinner-lucide {
     animation: spin 1s linear infinite;
+}
+.spinner-lucide-large {
+    animation: spin 1.5s linear infinite;
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 

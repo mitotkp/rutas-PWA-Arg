@@ -3,6 +3,8 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { store, loadPedidosGuardados, loadPedidoById } from '@/store.js';
 import { exportOrdersToExcel } from '@/utils/excelExporter';
+// 1. Importamos los iconos de Lucide
+import { Download, Info, FilePlus, FileText } from 'lucide-vue-next';
 
 const router = useRouter();
 
@@ -14,9 +16,7 @@ onMounted(() => {
 
 function selectPedido(pedido) {
     loadPedidoById(pedido); 
-
     router.push({ name: 'catalogo' })
-
 }
 
 function handleExport() {
@@ -35,20 +35,20 @@ function formatDate(dateString) {
         <div class="view-header">
             <h1 class="view-title">Pedidos Guardados</h1>
             <button @click="handleExport" class="export-btn" title="Descargar historial en Excel">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <Download :size="20" />
                 <span>Exportar</span>
             </button>
         </div>
 
         <div class="info-banner">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <Info :size="20" />
             <span>
                 Para mantener la aplicación rápida, el historial de pedidos se elimina automáticamente después de <strong>2 semanas</strong>.
             </span>
         </div>
 
         <div v-if="store.pedidosGuardadosList.length === 0" class="empty-state">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            <FilePlus :size="64" />
             <h2>No hay pedidos</h2>
             <p>Los pedidos que inicies aparecerán aquí.</p>
         </div>
@@ -56,7 +56,7 @@ function formatDate(dateString) {
         <div v-else class="pedidos-list">
             <div v-for="pedido in store.pedidosGuardadosList" :key="pedido.id" class="card pedido-card" @click="selectPedido(pedido)">
                 <div class="pedido-icon">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                     <FileText :size="24" />
                 </div>
                 <div class="pedido-info">
                     <strong class="cliente-nombre">{{ pedido.clienteNombre }}</strong>

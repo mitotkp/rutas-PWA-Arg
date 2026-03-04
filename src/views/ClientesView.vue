@@ -2,6 +2,8 @@
 import { ref, computed } from 'vue';
 import { store } from '@/store.js';
 import ClienteActionModal from '@/components/ClienteActionModal.vue';
+// 1. Importamos los iconos de Lucide
+import { Search, User, Check } from 'lucide-vue-next';
 
 const searchTerm = ref(''); 
 const selectedClient = ref(null); 
@@ -40,7 +42,6 @@ const filteredClients = computed(() => {
   });
 });
 
-
 function openActionModal(cliente) {
   selectedClient.value = cliente;
   isModalVisible.value = true;
@@ -66,7 +67,7 @@ function wasVisitedToday(cliente) {
       <h1>Mis Clientes Asignados</h1>
       <div class="search-wrapper">
         <input type="text" v-model="searchTerm" placeholder="Buscar en mis clientes..." class="search-input">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <Search class="search-icon" :size="20" />
       </div>
     </div>
 
@@ -74,9 +75,9 @@ function wasVisitedToday(cliente) {
       <div v-for="(cliente, index) in filteredClients" :key="`${cliente.codCliente}-${index}`" class="client-card" @click="openActionModal(cliente)">
         <div class="client-avatar">
           <div v-if="wasVisitedToday(cliente)" class="visited-indicator">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <Check :size="16" color="white" :stroke-width="3" />
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          <User :size="32" />
         </div>
         <div class="client-info">
           <h2 class="client-name">{{ cliente.nombreComercial }}</h2>
@@ -113,7 +114,6 @@ function wasVisitedToday(cliente) {
 }
 .header {
   margin-bottom: 20px;
-  
 }
 .header h1 {
   font-size: 24px;

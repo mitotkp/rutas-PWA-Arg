@@ -5,6 +5,8 @@ import { store, syncCatalogo, setAlert, setPreselectedClient, iniciarOAgregarIte
 import { db } from '@/database.js';
 import FiltroCatalogoModal from '@/components/FiltroCatalogoModal.vue';
 import ProductDetailModal from '@/components/ProductDetailModal.vue';
+// 1. Importamos los iconos de Lucide
+import { RefreshCw, ShoppingCart, Filter, CheckCircle, Image as ImageIcon, Search, Loader2 } from 'lucide-vue-next';
 
 const router = useRouter(); 
 
@@ -135,12 +137,11 @@ onMounted(async () => {
 });
 </script>
 
-
 <template>
   <div class="catalogo-container">
     <div v-if="store.isLoadingCatalogo" class="loading-overlay">
       <div class="loading-content">
-        <svg class="spinner" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle></svg>
+        <Loader2 :size="50" class="spinner-lucide" color="#28a745" />
         <h2>Sincronizando Catálogo</h2>
         <p class="loading-status">{{ store.loadingMessage }}</p>
         <div class="progress-bar">
@@ -161,20 +162,23 @@ onMounted(async () => {
               </select>
               <div class="action-buttons">
                 <button @click="handleResync" class="action-btn" title="Sincronizar Catálogo">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+                  <RefreshCw :size="20" />
                 </button>
-                 <button @click="goToPedido" class="action-btn" :disabled="!selectedClientId" title="Crear/Ver Pedido">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                <button @click="goToPedido" class="action-btn" :disabled="!selectedClientId" title="Crear/Ver Pedido">
+                    <ShoppingCart :size="20" />
                     <span v-if="totalItemsPedido > 0" class="badge">{{ totalItemsPedido }}</span>
                 </button>
                 <button @click="isFilterModalVisible = true" class="action-btn" title="Filtros Avanzados">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                  <Filter :size="20" />
                 </button>
               </div>
             </div>
+            
             <div class="search-wrapper">
+              <Search :size="18" class="search-icon" />
               <input type="text" v-model="searchTerm" placeholder="Buscar por descripción, ref. o marca..." class="search-input">
             </div>
+            
           </div>
           <div class="filters-bar">
             <div class="stock-filter">
@@ -189,7 +193,7 @@ onMounted(async () => {
       </div>
       
       <div v-if="store.pedido.cliente && store.pedido.status === 'Subido'" class="readonly-banner">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <CheckCircle :size="24" />
         <span>
             El pedido para <strong>{{ store.pedido.cliente.nombreComercial }}</strong> ya fue subido. Para crear un nuevo pedido, seleccione otro cliente.
         </span>
@@ -205,7 +209,7 @@ onMounted(async () => {
                     class="real-product-img"
                     loading="lazy"
                 />
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                <ImageIcon v-else :size="48" />
             </div>
             <div class="product-info">
                 <h3 class="product-name">{{ producto.descripcion }}</h3>
@@ -224,6 +228,7 @@ onMounted(async () => {
         <p>No se encontraron productos con los filtros actuales.</p>
       </div>
     </template>
+    
     <ProductDetailModal 
       :is-visible="isProductModalVisible"
       :producto="selectedProduct"
@@ -246,11 +251,10 @@ onMounted(async () => {
   display: flex; 
   flex-direction: column;
   min-height: 100vh;
-
 }
 .sticky-controls {
   position: sticky;
-  top: 0px; /* Altura del DynamicHeader */
+  top: 0px; 
   z-index: 10;
   background-color: #f4f7f9;
   border-bottom: 1px solid #e2e8f0;
@@ -263,19 +267,17 @@ onMounted(async () => {
 }
 .loading-content {
   text-align: center; color: #2c3e50; width: 80%;
+  display: flex; flex-direction: column; align-items: center;
 }
-.spinner {
-  animation: rotate 2s linear infinite; width: 50px; height: 50px; margin-bottom: 20px;
+/* Animación para el nuevo spinner de Lucide */
+.spinner-lucide {
+  margin-bottom: 20px;
+  animation: spin 1s linear infinite;
 }
-.spinner .path {
-  stroke: #28a745; stroke-linecap: round; animation: dash 1.5s ease-in-out infinite;
+@keyframes spin { 
+  100% { transform: rotate(360deg); } 
 }
-@keyframes rotate { 100% { transform: rotate(360deg); } }
-@keyframes dash {
-  0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
-  50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
-  100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
-}
+
 .loading-content h2 { font-size: 20px; margin: 0 0 10px 0; }
 .loading-status { font-size: 14px; color: #718096; margin-bottom: 20px; height: 20px; }
 .progress-bar { width: 100%; height: 8px; background-color: #e0e0e0; border-radius: 4px; overflow: hidden; }
@@ -296,8 +298,10 @@ onMounted(async () => {
     justify-content: space-between;
     align-items: center;
 }
+/* Configuración para contener el icono de búsqueda */
 .search-wrapper {
   width: 100%;
+  position: relative;
 }
 .client-selector {
   flex-grow: 1;
@@ -338,10 +342,6 @@ onMounted(async () => {
   border-radius: 50%; padding: 2px 6px;
   font-size: 10px; font-weight: bold;
 }
-.action-btn:disabled {
-  background-color: #95a5a6;
-  cursor: not-allowed;
-}
 .filters-bar {
   display: flex;
   flex-wrap: wrap;
@@ -354,7 +354,8 @@ onMounted(async () => {
 }
 .search-input {
   width: 100%;
-  padding: 12px 15px;
+  /* Aumentamos el padding-left para que el texto no pise la lupa */
+  padding: 12px 15px 12px 40px;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   font-size: 16px;

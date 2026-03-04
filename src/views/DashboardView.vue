@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router';
 import { store } from '@/store.js';
 import { getTotalDeudaVendedor, countPedidosDeHoy } from '@/database';
 import QuickPedidoModal from '@/components/QuickPedidoModal.vue';
+// 1. Importar los iconos de Lucide
+import { Play, Users, BookOpen, FilePlus } from 'lucide-vue-next';
 
 // Calcula el total de la deuda de todos los clientes
 let totalCuentasPorCobrar = ref(null)
@@ -88,7 +90,6 @@ const router = useRouter();
       <p class="subtitle">{{ fechaActual }}</p>
     </div>
 
-    <!-- Tarjeta de Acción Principal -->
     <div class="card primary-card">
       <div class="card-header">
         <h2>Mi Ruta de Hoy</h2>
@@ -101,18 +102,17 @@ const router = useRouter();
             <strong>{{ clientesEnRuta }}</strong>
           </div>
           <button class="action-button" @click="router.push({ name: 'rutas' })">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <Play :size="20" />
             <span>Iniciar Ruta</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Tarjetas de Métricas -->
     <div class="metrics-grid">
         <div class="card metric-card">
             <h3>Cuentas por Cobrar</h3>
-            <p v-if="isLoadingDebt" class="metric-value">Calculando...</p>
+            <p v-if="isLoading" class="metric-value">Calculando...</p>
             <p v-else class="metric-value debt">{{ totalCuentasFormateado }}</p>
         </div>
         <div class="card metric-card">
@@ -121,28 +121,26 @@ const router = useRouter();
         </div>
     </div>
 
-    <!-- Cuadrícula de Acciones Rápidas -->
     <h2 class="section-title">Acciones Rápidas</h2>
     <div class="quick-actions-grid">
         <RouterLink to="/clientes" class="quick-actions-link">
             <div class="card action-card">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <Users :size="24" />
                 <span>Mis Clientes</span>
             </div>
         </RouterLink>
         <RouterLink to="/catalogo" class="quick-actions-link">
           <div class="card action-card">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="22" height="12" rx="2" ry="2"></rect><path d="M6 12h12"></path></svg>
+            <BookOpen :size="24" />
             <span>Catálogo</span>
           </div>
         </RouterLink>
       
         <div @click="quickPedidoModalVisible = true" class="card action-card" >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          <FilePlus :size="24" />
           <span>Crear Pedido</span>
         </div>
 
-     
     </div>
   </div>
 
@@ -266,12 +264,18 @@ const router = useRouter();
   transition: transform 0.2s, box-shadow 0.2s;
   text-align: center;
   padding: 20px 15px;
+  /* IMPORTANTE: Añadimos flexbox para asegurar que el contenido se centre correctamente con Lucide */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .action-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
-.action-card svg {
+/* Modificamos esta clase para apuntar directamente a los iconos de Lucide (que generan un svg interno) */
+.action-card > svg {
   margin-bottom: 10px;
   color: #34495e;
 }

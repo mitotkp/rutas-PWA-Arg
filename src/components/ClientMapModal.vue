@@ -3,6 +3,8 @@ import { ref, watch, nextTick } from 'vue';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { saveClientCoordinates } from '@/store.js';
+// 1. Importamos los iconos de Lucide
+import { X, Search, MapPin } from 'lucide-vue-next';
 
 const props = defineProps({
   isVisible: Boolean,
@@ -100,8 +102,10 @@ watch(() => props.isVisible, async (newVal) => {
     <div v-if="isVisible" class="modal-overlay" @click.self="emit('close')">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>Ubicación de {{ cliente?.nombreComercial }}</h2>
-          <button class="close-button" @click="emit('close')">&times;</button>
+          <h2><MapPin :size="20" /> Ubicación de {{ cliente?.nombreComercial }}</h2>
+          <button class="close-button" @click="emit('close')">
+            <X :size="24" />
+          </button>
         </div>
         
         <div class="content-wrapper">
@@ -112,13 +116,13 @@ watch(() => props.isVisible, async (newVal) => {
             <div class="search-bar">
               <input type="text" v-model="searchAddress" placeholder="Introduce la dirección a buscar...">
               <button @click="searchForAddress" :disabled="isSearching">
-                <svg v-if="!isSearching" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <Search v-if="!isSearching" :size="18" />
                 <span v-else>...</span>
               </button>
             </div>
             <div class="search-results">
                 <div v-if="isSearching" class="loading-spinner">Buscando...</div>
-                <p v-else-if="noResultsFound">No se encontraron resultados.</p>
+                <p v-else-if="noResultsFound" class="no-results">No se encontraron resultados.</p>
                 <ul v-else>
                     <li v-for="result in searchResults" :key="result.place_id" @click="selectAndSaveAddress(result)">
                         <strong>{{ result.display_name.split(',')[0] }}</strong>
@@ -149,10 +153,26 @@ watch(() => props.isVisible, async (newVal) => {
   padding-bottom: 15px; border-bottom: 1px solid #eee;
   flex-shrink: 0; /* Evita que el header se encoja */
 }
-.modal-header h2 { font-size: 18px; margin: 0; color: #333; }
+.modal-header h2 { 
+  font-size: 18px; 
+  margin: 0; 
+  color: #333;
+  /* Centramos el icono del título con el texto */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .close-button {
-  background: none; border: none; font-size: 28px;
+  background: none; border: none; 
   cursor: pointer; color: #888;
+  /* Alineación de la X */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.close-button:hover {
+  color: #333;
 }
 .content-wrapper {
     margin-top: 20px;
@@ -185,6 +205,10 @@ watch(() => props.isVisible, async (newVal) => {
 .search-bar button {
     padding: 10px 15px; border: none; background-color: #28a745; color: white; border-radius: 6px; cursor: pointer;
     display: flex; align-items: center; justify-content: center; width: 80px;
+    transition: background-color 0.2s;
+}
+.search-bar button:hover:not(:disabled) {
+    background-color: #218838;
 }
 .search-bar button:disabled { background-color: #95a5a6; }
 .search-results {
