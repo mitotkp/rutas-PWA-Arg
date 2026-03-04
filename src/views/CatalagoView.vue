@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { store, syncCatalogo, setAlert, setPreselectedClient, iniciarOAgregarItem, totalItemsPedido, setPedidoCliente } from '@/store.js';
+import { store, syncCatalogo, setAlert, setPreselectedClient, iniciarOAgregarItem, totalItemsPedido, setPedidoCliente, pausarPedidoActual } from '@/store.js';
 import { db } from '@/database.js';
 import FiltroCatalogoModal from '@/components/FiltroCatalogoModal.vue';
 import ProductDetailModal from '@/components/ProductDetailModal.vue';
@@ -28,9 +28,14 @@ const selectedClientId = computed({
     return store.pedido.cliente?.codCliente || null;
   },
   set(newClientId) {
-    const newClient = store.clientes.find(c => c.codCliente === newClientId);
-    if (newClient) {
-      setPedidoCliente(newClient);
+    if (!newClientId) {
+      // Si el usuario vuelve a la opción vacía (null), cerramos el pedido
+      pausarPedidoActual();
+    } else {
+      const newClient = store.clientes.find(c => c.codCliente === newClientId);
+      if (newClient) {
+        setPedidoCliente(newClient);
+      }
     }
   }
 });
@@ -155,7 +160,10 @@ onMounted(async () => {
           <div class="header">
             <div class="header-top">
               <select v-model="selectedClientId" class="client-selector">
-                <option :value="null" disabled>-- Seleccionar Cliente --</option>
+                <option :value="null">
+                  {{ store.pedido.cliente ? '-- Guardar y Cerrar Pedido --' : '-- Seleccionar Cliente --' }}
+                </option>
+                
                 <option v-for="cliente in store.clientes" :key="cliente.codCliente" :value="cliente.codCliente">
                   {{ cliente.nombreComercial }}
                 </option>

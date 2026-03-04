@@ -3,6 +3,54 @@ import { db, processAndSaveApiData, processAndSaveCatalogData, saveOrUpdatePedid
 import { encriptacion } from "./encriptacion.js";
 import { startHeartbeat, stopHeartbeat } from "./services/connectionService.js";
 import { BACK_URL } from "../backurl.js";
+import { io } from "socket.io-client";
+
+let socket = null 
+let gpsWatchId = null 
+
+export function iniciarRastreo() {
+    if (!store.user) return;
+
+    const serverUrl = BACK_URL.split('/VentaRuta')[0]; 
+    socket = io(serverUrl);
+
+    socket.on('connect', () => {
+        console.log('📡 Conectado al satélite de rastreo (WebSocket)');
+    });
+
+    if (navigator.geolocation) {
+        gpsWatchId = navigator.geolocation.watchPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                
+                if (socket && socket.connected) {
+                    socket.emit('enviarUbicacion', {
+                        codVendedor: store.user.codVendedor,
+                        nombre: store.user.nombre,
+                        lat: latitude,
+                        lng: longitude,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            },
+            (error) => {
+                console.error('Error de GPS en rastreo:', error.message);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+        );
+    }
+}
+
+export function detenerRastreo() {
+    if (gpsWatchId) {
+        navigator.geolocation.clearWatch(gpsWatchId);
+        gpsWatchId = null;
+    }
+    if (socket) {
+        socket.disconnect();
+        socket = null;
+    }
+}
 
 function saveSession(codVendedor) {
     localStorage.setItem('loggedInUser', codVendedor);
@@ -361,6 +409,22 @@ export function limpiarPedido() {
     store.pedido.id = null; 
 }
 
+export async function pausarPedidoActual() {
+    // Si hay un cliente y el pedido tiene items, lo guardamos localmente
+    if (store.pedido.cliente && store.pedido.items.length > 0 && store.user && store.pedido.status === 'Pendiente') {
+        await saveOrUpdatePedido(store.pedido, store.user.codVendedor);
+        setAlert('success', 'Pedido guardado para continuar después.');
+    }
+
+    // Limpiamos el pedido actual de la memoria (esto libera la pantalla)
+    limpiarPedido();
+
+    // Recargamos la lista del historial
+    if (store.user) {
+        await loadPedidosGuardados(store.user.codVendedor);
+    }
+}
+
 export const totalItemsPedido = computed(() => {
     return store.pedido.items.reduce((sum, item) => sum + item.cantidad, 0);
 });
@@ -393,7 +457,7 @@ export async function subirPedidoActual() {
 
         store.pedido.id = pedidoId; 
 
-        const idRes = await fetch(`${BACK_URL}/ventaruta/recursos/pedidos/getIdentificador`, {
+        const idRes = await fetch(`${BACK_URL}/ventaRuta/recursos/pedidos/getIdentificador`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -452,17 +516,25 @@ export async function subirPedidoActual() {
 }
 
 export async function cancelarPedidoActual() {
-    if(!store.pedido.cliente || !store.pedido.id || store.pedido.status !== 'Pendiente') {
+    // Quitamos la restricción del !store.pedido.id
+    if(!store.pedido.cliente || store.pedido.status !== 'Pendiente') {
         setAlert('error', 'No se puede cancelar este pedido.');
         return false;
     }
 
     try{
-        await deletePedido(store.pedido.id);
+        // Solo intentamos borrar de la BDD si realmente tiene un ID guardado
+        if (store.pedido.id) {
+            await deletePedido(store.pedido.id);
+        }
 
+        // Limpiamos el estado en memoria
         limpiarPedido()
 
-        await loadPedidosGuardados(store.user.codVendedor)
+        // Recargamos la lista para actualizar la vista
+        if (store.user) {
+            await loadPedidosGuardados(store.user.codVendedor)
+        }
 
         setAlert('success', 'El pedido ha sido cancelado.');
         return true;
@@ -471,7 +543,6 @@ export async function cancelarPedidoActual() {
         setAlert('error', 'Ocurrió un error al cancelar el pedido.');
         return false;
     }
-
 }
 
 export async function restoreSession() {

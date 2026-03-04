@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import loginView from '@/views/loginView.vue'
 import DashboardView from '@/views/DashboardView.vue'
+import AdminMapaView from '@/views/AdminMapaView.vue'
 import { isAuthenticated } from '@/store'
 
 const router = createRouter({
@@ -58,6 +59,12 @@ const router = createRouter({
       name:'rutas',
       component: () => import('../views/RutasView.vue'),
       meta: { requiresAuth: true}
+    },
+    {
+      path: '/admin-mapa',
+      name: 'admin-mapa',
+      component: AdminMapaView,
+      meta: { requiresAuth: true }
     }
   ],
 })

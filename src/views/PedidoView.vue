@@ -1,10 +1,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { store, totalMontoPedido, subirPedidoActual, eliminarItemDelPedido, actualizarCantidadItem, cancelarPedidoActual } from '@/store.js';
+import { store, totalMontoPedido, subirPedidoActual, eliminarItemDelPedido, actualizarCantidadItem, cancelarPedidoActual, pausarPedidoActual } from '@/store.js';
 import EditOrderItemModal from '@/components/EditOrderItemModal.vue';
 // 1. Importamos los iconos de Lucide
-import { ShoppingCart, Pencil, Trash2, CloudUpload, Loader2, CheckCircle } from 'lucide-vue-next';
+import { ShoppingCart, Pencil, Trash2, CloudUpload, Loader2, CheckCircle, Save } from 'lucide-vue-next';
 
 const router = useRouter();
 
@@ -49,6 +49,11 @@ function openEditModal(item) {
 
 function handleUpdateItem(updateData) {
   actualizarCantidadItem(updateData.codArticulo, updateData.cantidad);
+}
+
+async function handlePausarPedido() {
+    await pausarPedidoActual();
+    router.push({ name: 'pedidos-lista' });
 }
 
 function goToCatalog() {
@@ -119,7 +124,12 @@ function formatDate(dateString) {
                 <button @click="goToCatalog" class="secondary-action">
                     {{ store.pedido.status === 'Subido' ? 'Volver' : 'Volver' }}
                 </button>
-                
+
+                <button v-if="store.pedido.status === 'Pendiente'" @click="handlePausarPedido" class="pause-action">
+                    <Save :size="20" />
+                    <span class="action-text">Pausar</span>
+                </button>
+                            
                 <button v-if="store.pedido.status === 'Pendiente'" @click="handleCancelClick" class="cancel-action" :class="{ 'confirm': isCancelConfirmVisible }">
                     <Trash2 :size="20" />
                     <span>{{ isCancelConfirmVisible ? '¿Confirmar?' : 'Cancelar' }}</span>
@@ -261,6 +271,27 @@ function formatDate(dateString) {
 .spinner-lucide {
     animation: spin 1s linear infinite;
 }
+
+.pause-action {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+.pause-action:hover {
+    background-color: #2980b9;
+}
+
 @keyframes spin { 
     100% { transform: rotate(360deg); } 
 }
@@ -310,5 +341,9 @@ function formatDate(dateString) {
         width: 100%;
         padding: 14px;
     }
+}
+
+@media (max-width: 480px) {
+    .action-text { display: none; }
 }
 </style>

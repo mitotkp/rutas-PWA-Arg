@@ -37,6 +37,11 @@ import { Home, Users, Truck, BookOpen, FileText, CloudDownload } from 'lucide-vu
         <FileText :size="20" />
         <span>Pedidos</span>
       </RouterLink>
+
+      <RouterLink to="/admin-mapa" class="nav-link" @click="toggleSidenav">
+        <FileText :size="20" />
+        <span>Radar Vendedores</span>
+      </RouterLink>
     </nav>
     
     <div class="sidenav-footer">
